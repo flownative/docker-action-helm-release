@@ -1,4 +1,4 @@
-FROM flownative/base:1
+FROM flownative/base:3
 
 ENV HELM_VERSION v3.0.2
 ENV HELM_HOME=/root/.helm
