@@ -1,6 +1,6 @@
-FROM flownative/base:3
+FROM flownative/base:bookworm
 
-ENV HELM_VERSION v3.0.2
+ENV HELM_VERSION v3.15.3
 ENV HELM_HOME=/root/.helm
 
 # We need Git for "helm plugin install"

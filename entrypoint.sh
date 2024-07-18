@@ -42,4 +42,5 @@ cd "${INPUT_CHARTS_FOLDER}"
 
 helm inspect chart "${INPUT_CHART_NAME}"
 helm package --app-version "${INPUT_APP_VERSION}" --version "${INPUT_CHART_VERSION}" "${INPUT_CHART_NAME}"
-helm cm-push "${INPUT_CHART_NAME}-${INPUT_CHART_VERSION}.tgz" "${INPUT_REPOSITORY_URL}" --username "${INPUT_REPOSITORY_USER}" --password "${INPUT_REPOSITORY_PASSWORD}" --force
+helm repo add --username "${INPUT_REPOSITORY_USER}" --password "${INPUT_REPOSITORY_PASSWORD}" target-repository "${INPUT_REPOSITORY_URL}"
+helm push --force "${INPUT_CHART_NAME}-${INPUT_CHART_VERSION}.tgz" "${INPUT_REPOSITORY_URL}" "${INPUT_REPOSITORY_URL}"
