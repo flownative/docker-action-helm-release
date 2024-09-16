@@ -1,8 +1,6 @@
 #!/bin/bash
 set -ex
 
-helm plugin install https://github.com/chartmuseum/helm-push.git
-
 export INPUT_CHARTS_FOLDER=${INPUT_CHARTS_FOLDER:-.}
 
 if [ -z "${INPUT_CHART_NAME}" ]; then
@@ -10,8 +8,13 @@ if [ -z "${INPUT_CHART_NAME}" ]; then
   exit 1
 fi
 
-if [ -z "${INPUT_REPOSITORY_URL}" ]; then
-  echo "repository_url is not set"
+if [ -z "${INPUT_REGISTRY_HOST}" ]; then
+  echo "registry_host is not set"
+  exit 1
+fi
+
+if [ -z "${INPUT_REPOSITORY_PATH}" ]; then
+  echo "repository_path is not set"
   exit 1
 fi
 
@@ -40,7 +43,7 @@ INPUT_APP_VERSION=$(echo "${INPUT_APP_VERSION}" | sed -e 's|refs/tags||' | sed -
 
 cd "${INPUT_CHARTS_FOLDER}"
 
-helm inspect chart "${INPUT_CHART_NAME}"
+helm inspect chart "${INPUT_CHARTS_FOLDER}"/"${INPUT_CHART_NAME}"
 helm package --app-version "${INPUT_APP_VERSION}" --version "${INPUT_CHART_VERSION}" "${INPUT_CHART_NAME}"
-echo "${INPUT_REPOSITORY_PASSWORD}" | helm registry login -u "${INPUT_REPOSITORY_USER}" --password-stdin "${INPUT_REPOSITORY_URL}"
-helm push --force "${INPUT_CHART_NAME}-${INPUT_CHART_VERSION}.tgz" "${INPUT_REPOSITORY_URL}" "${INPUT_REPOSITORY_URL}"
+echo "${INPUT_REPOSITORY_PASSWORD}" | helm registry login -u "${INPUT_REPOSITORY_USER}" --password-stdin "${INPUT_REGISTRY_HOST}"
+helm push "${INPUT_CHART_NAME}-${INPUT_CHART_VERSION}.tgz" "oci://${INPUT_REGISTRY_HOST}/${INPUT_REPOSITORY_PATH}/${INPUT_CHART_NAME}"
