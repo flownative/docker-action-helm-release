@@ -12,47 +12,37 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build Docker image
-        uses: flownative/action-docker-build@v1
-        with:
-          tag_ref: ${{ github.ref }}
-          git_repository_url: https://github.com/${{ github.repository }}
-          git_sha: ${{ github.sha }}
-          image_name: flownative/docker-action-helm-release/action-helm-release
-          registry_password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Determine latest released version
+      - name: Determine latest version
         id: latest_version
-        uses: flownative/action-git-latest-release@master
+        uses: flownative/action-git-latest-release@v1
 
-      - name: Tag semver releases
-        uses: flownative/action-docker-publish-semver@master
+      - run: |
+          sudo chmod -R ugo+rwX . && shopt -s dotglob && rm -rf *
+
+      - uses: actions/checkout@v4
         with:
-          tag_ref: ${{ steps.latest_version.outputs.tag }}
-          tag_latest: 'yes'
+          ref: ${{ steps.latest_version.outputs.tag }}
+          fetch-depth: 100
 
-          source_image_name: docker.pkg.github.com/flownative/docker-action-helm-release/action-helm-release
-          source_registry_username: github
-          source_registry_password: ${{ secrets.GITHUB_TOKEN }}
-          source_registry_endpoint: https://docker.pkg.github.com/v2/
-
-          target_image_name: docker.pkg.github.com/flownative/docker-action-helm-release/action-helm-release
-          target_registry_username: github
-          target_registry_password: ${{ secrets.GITHUB_TOKEN }}
-          target_registry_endpoint: https://docker.pkg.github.com/v2/
-
-      - name: Publish release to docker.io
-        uses: flownative/action-docker-publish-semver@master
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
         with:
-          tag_ref: ${{ steps.latest_version.outputs.tag }}
-          tag_latest: 'yes'
+          flavor: |
+            latest=true
+          images: |
+            flownative/action-helm-release
+          labels: |
+            org.opencontainers.image.version=${{ steps.latest_version.outputs.version }}
+          tags: |
+            type=semver,pattern={{major}},value=${{ steps.latest_version.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ steps.latest_version.outputs.version }}
+            type=semver,pattern={{version}},value=${{ steps.latest_version.outputs.version }}
 
-          source_image_name: docker.pkg.github.com/flownative/docker-action-helm-release/action-helm-release
-          source_registry_username: github
-          source_registry_password: ${{ secrets.GITHUB_TOKEN }}
-          source_registry_endpoint: https://docker.pkg.github.com/v2/
+      - name: Set up QEMU
+        id: qemu
+        uses: docker/setup-qemu-action@v1
 
-          target_image_name: flownative/action-helm-release
-          target_registry_username: ${{ secrets.DOCKER_IO_REGISTRY_USER }}
-          target_registry_password: ${{ secrets.DOCKER_IO_REGISTRY_PASSWORD }}
-          target_registry_endpoint: https://index.docker.io/v1/
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1

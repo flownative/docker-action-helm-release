@@ -1,4 +1,4 @@
-# Docker Image for the Helm Release Github Action
+# Docker Image for the Helm Release GitHub Action
 
 This is the actual implementation of the
 [Flownative GitHub Action for releasing Helm charts](https://github.com/flownative/action-helm-release).
