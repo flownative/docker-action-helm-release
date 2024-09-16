@@ -43,7 +43,7 @@ INPUT_APP_VERSION=$(echo "${INPUT_APP_VERSION}" | sed -e 's|refs/tags||' | sed -
 
 cd "${INPUT_CHARTS_FOLDER}"
 
-helm inspect chart "${INPUT_CHARTS_FOLDER}"/"${INPUT_CHART_NAME}"
+helm inspect chart "${INPUT_CHART_NAME}"
 helm package --app-version "${INPUT_APP_VERSION}" --version "${INPUT_CHART_VERSION}" "${INPUT_CHART_NAME}"
 echo "${INPUT_REPOSITORY_PASSWORD}" | helm registry login -u "${INPUT_REPOSITORY_USER}" --password-stdin "${INPUT_REGISTRY_HOST}"
 helm push "${INPUT_CHART_NAME}-${INPUT_CHART_VERSION}.tgz" "oci://${INPUT_REGISTRY_HOST}/${INPUT_REPOSITORY_PATH}/${INPUT_CHART_NAME}"
